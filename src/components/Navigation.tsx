@@ -4,10 +4,26 @@ import { cn } from "@/lib/utils";
 
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("hero");
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      
+      // Update active section based on scroll position
+      const sections = ["hero", "about", "skills", "experience", "projects", "contact"];
+      const currentSection = sections.find(section => {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          return rect.top <= 100 && rect.bottom >= 100;
+        }
+        return false;
+      });
+      
+      if (currentSection) {
+        setActiveSection(currentSection);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -15,36 +31,66 @@ const Navigation = () => {
   }, []);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
+    const element = document.getElementById(id === "hero" ? "top" : id);
     element?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const navItems = [
+    { id: "about", label: "About" },
+    { id: "skills", label: "Skills" },
+    { id: "experience", label: "Experience" },
+    { id: "projects", label: "Projects" },
+    { id: "contact", label: "Contact" }
+  ];
 
   return (
     <nav
       className={cn(
-        "fixed top-0 w-full z-50 transition-all duration-300",
+        "fixed top-0 w-full z-50 transition-all duration-500",
         isScrolled
-          ? "bg-white/90 backdrop-blur-md shadow-lg"
+          ? "bg-white/80 backdrop-blur-xl shadow-sm border-b border-slate-100/50"
           : "bg-transparent"
       )}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4">
+      <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="flex justify-between items-center">
-          <div className="text-2xl font-bold text-slate-800">
-            Jebin Joice
-          </div>
+          {/* Logo */}
+          <button
+            onClick={() => scrollToSection("hero")}
+            className="text-2xl font-light text-slate-900 hover:text-blue-600 transition-colors duration-300"
+          >
+            JJ
+          </button>
           
-          <div className="hidden md:flex space-x-8">
-            {["about", "skills", "experience", "projects", "contact"].map((item) => (
+          {/* Navigation Items */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => (
               <button
-                key={item}
-                onClick={() => scrollToSection(item)}
-                className="text-slate-600 hover:text-blue-600 transition-colors duration-200 capitalize"
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={cn(
+                  "relative text-sm font-light tracking-wide transition-all duration-300",
+                  activeSection === item.id
+                    ? "text-slate-900"
+                    : "text-slate-500 hover:text-slate-900"
+                )}
               >
-                {item}
+                {item.label}
+                {activeSection === item.id && (
+                  <div className="absolute -bottom-1 left-0 w-full h-px bg-blue-500 animate-fade-in" />
+                )}
               </button>
             ))}
           </div>
+
+          {/* Mobile menu button */}
+          <button className="md:hidden text-slate-600 hover:text-slate-900 transition-colors">
+            <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+              <div className="w-full h-px bg-current"></div>
+              <div className="w-full h-px bg-current"></div>
+              <div className="w-full h-px bg-current"></div>
+            </div>
+          </button>
         </div>
       </div>
     </nav>
